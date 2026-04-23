@@ -60,6 +60,8 @@ class GRAFO {
     void ListaPredecesores(); // Recorre la lista de sucesores LS para construir la de predecesores, LP
     void ComponentesConexas(); // Construye el vector de componentes conexas de un grafo no dirigido
     void ComponentesFuertementeConexas(); //
+		// PRACTICA 4
+		void Prim();
     ~GRAFO(); //Destructor del objeto grafo
 };
 

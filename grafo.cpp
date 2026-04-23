@@ -176,7 +176,7 @@ void GRAFO::dfs_postnum(unsigned i, vector<bool> &visitado, vector<unsigned> &po
 }
 
 void GRAFO::ComponentesFuertementeConexas() 
-{ 
+{
   unsigned i, postnum_ind, componentesfuertementeconexas = 0; 
   vector<bool> visitado; 
   vector<unsigned> postnum;  
@@ -191,14 +191,78 @@ void GRAFO::ComponentesFuertementeConexas()
     i++;
   } 
   visitado.assign(n, false); 
-  i = n - 1;
-  while (i >= 0) {
+  i = 0;
+  while (i < n) {
     if (visitado[postnum[i]] == false) {   
       componentesfuertementeconexas++;
       cout << "Componente Fuertemente Conexa " << componentesfuertementeconexas << " : { ";
       dfs_cfc(postnum[i], visitado);
       cout << " }" << endl;
     }
-    i--;
+    i++;
   }
+}
+
+void GRAFO::Prim() {
+	vector<bool> M;
+	vector<int> coste;
+	vector<unsigned> pred;
+	M.resize(n, false);
+	coste.resize(n, maxint);
+	pred.resize(n, UERROR);
+	int nodo;
+	cout << "Introduzca un nodo de partida: "; cin >> nodo;
+	
+	// 1. REGLA DE ORO y Preparativos iniciales
+  unsigned r = nodo - 1; 
+  coste[r] = 0;
+  pred[r] = r;
+  unsigned u = r; // 'u' será siempre la última ciudad que hemos conquistado
+  M[u] = true;    // Ya tenemos nuestra primera ciudad en el imperio
+	vector<unsigned> orden;
+	orden.push_back(u);
+	int pesoMST = 0; // Aquí iremos sumando el coste total del asfalto
+    
+  // 2. EL BUCLE PRINCIPAL (n-1 iteraciones)
+  for (unsigned i = 1; i < n; i++) {
+    // Fase A: Asomarnos a los vecinos de 'u' y actualizar la libreta
+    for (unsigned j = 0; j < LS[u].size(); j++) {
+      unsigned vecino = LS[u][j].j;
+      int coste_carretera = LS[u][j].c;
+            
+      // Si el vecino NO está en M, y esta carretera es más barata que la que teníamos...
+      if (M[vecino] == false && coste[vecino] > coste_carretera) {
+        coste[vecino] = coste_carretera; // Apuntamos el nuevo superprecio
+        pred[vecino] = u;                // Apuntamos que llegaremos desde 'u'
+      }
+    }
+        
+    // Fase B: Buscar la ciudad NO conquistada con el precio más barato
+  	int min_coste = maxint;
+    for (unsigned k = 0; k < n; k++) {
+      if (M[k] == false && coste[k] < min_coste) {
+        min_coste = coste[k];
+        u = k; // ¡Tenemos nuevo candidato a conquistar!
+      }
+  	}
+        
+    // Fase C: Conquistar la ciudad ganadora 'u'
+  	M[u] = true;
+    pesoMST += coste[u];
+		orden.push_back(u);
+    
+    // Imprimir la carretera que hemos asfaltado (Regla de oro a la inversa para el usuario)
+    cout << "Arista anadida: (" << pred[u] + 1 << ", " << u + 1 << ") con coste " << coste[u] << endl;
+    }
+  cout << "Orden de inclusion de los nodos: ";
+	for (unsigned i = 0; i < orden.size(); i++) {
+		cout << orden[i] + 1; // +1 por la regla de oro para el usuario
+		
+		if (i < orden.size() - 1) {
+			cout << " -> ";
+		}
+	}
+	cout << endl;
+  // Al final, mostramos el dinero total que nos ha costado
+  cout << "El coste total del arbol generador minimo (MST) es: " << pesoMST << endl;
 }

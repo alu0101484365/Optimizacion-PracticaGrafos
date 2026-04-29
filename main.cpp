@@ -1,68 +1,144 @@
-/*
- *  GRAFO.h - definicion de la clase GRAFO
+ /*
+ *  Programa principal.
  *
- *  Autores : Antonio Sedeno Noda, Sergio Alonso
- *  Cursos  : 2012-2021
+ *
+ *               Autores : Antonio Sedeno Noda, Sergio Alonso.
+ *               Cursos  : 2012-2026
  */
 
-#ifndef _GRAPH_H
-#define _GRAPH_H
+#include <string.h>
+#include "grafo.h"
 
+void pressanykey()
+{     
+  char c;
+  //system("pause"); s�lo en windows
+  cout << endl;
+  cout << "pulsa [c] para continuar: ";
+  cin >> c;
+}
 
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <locale.h>
-#include <iostream>
-#include <fstream>
-#include <queue>
-#include <deque>
-
-
-using namespace std;
-
-//Solo para ubuntu, una forma de borrar la pantalla
-#define gotoxy(x,y)  printf("\33[%d;%dH",y,x)
-#define clrscr()     gotoxy(1,1); printf("\33[2J")
-
-const unsigned UERROR = 65000; // Para ciertos algoritmos es necesario codificar este valor de error
-const int maxint      = 1000000; // Para ciertos algoritmos es necesario codificar este valor de maximo
-
-// Definicion de un elemento de la lista de adyacencia
-
-typedef struct
+void menu (unsigned dirigido, char &opcion)
+//Expresion del menu de opciones segun sea un grafo dirigido o no dirigido
 {
-	unsigned j; // nodo
-	int      c; // atributo para expresar los costes, pesos, las longitudes, las inversiones, etc...
-} ElementoLista;
-
-// definicion del tipo de una lista de adyacencia de un nodo
-typedef vector<ElementoLista> LA_nodo;
-
-class GRAFO {
-	unsigned dirigido;  				// 0 si el grafo es no dirigido y 1 si es dirigido
-	unsigned n;         				// numero de NODOS
-	unsigned m;         				// numero de ARCOS
-  vector<LA_nodo> LS;         // Lista de adyacencia de los sucesores: es una matriz donde cada fila posiblemente es posiblemente de distinto tamano
-	vector<LA_nodo> LP;         // Lista de adyacencia de los predecesores: es una matriz dode cada fila posiblemente es posiblemente de distinto tamano
-	void destroy();             // Destructor del LS, y, en su caso, LP
-	void build (char nombrefichero[85], int &errorapertura); // Crea LS, A y, en su caso, LP, desde la lectura del fichero
-	void dfs_cc(unsigned i, vector<bool> &visitado); // Recorrido en profundidad recursivo con solo marca de visitado para el calculo de las componentes conexas
-	void dfs_postnum(unsigned i, vector<bool> &visitado, vector<unsigned> &postnum, unsigned &postnum_ind); // Recorrido en profundidad recursivo para calcular postnum
-	void dfs_cfc(unsigned i, vector<bool> &visitado); // Recorrido en profundidad recursivo con solo marca de visitado para el calculo de las componentes fuertemente conexas
-	
-	public:
-    GRAFO(char nombrefichero[], int &errorapertura);
-    void actualizar (char nombrefichero[], int &errorapertura);
-    unsigned Es_dirigido(); // devuelve 0 si el grafo es no dirigido y 1 si es dirigido
-    void Info_Grafo(); // devuelve informacion b�sica del grafo
-    void Mostrar_Listas(int l);  // Muestra la lista de adyacencia
-    void ListaPredecesores(); // Recorre la lista de sucesores LS para construir la de predecesores, LP
-    void ComponentesConexas(); // Construye el vector de componentes conexas de un grafo no dirigido
-    void ComponentesFuertementeConexas(); //
-		// PRACTICA 4
-		void Prim();
-    ~GRAFO(); //Destructor del objeto grafo
+  cout << "Optimiza!cion en Grafos, 2025-2026 RAUL NAVARRO COBOS" << endl;
+  cout << "c. [c]argar grafo desde fichero" << endl;
+  if (dirigido == 0) //Grafo no dirigido        
+  {
+    cout << "i. Mostrar [i]nformacion basica del grafo" << endl;
+    cout << "a. Mostrar la lista de [a]dyacencia del grafo" << endl;
+    cout << "o. Mostrar c[o]mponentes conexas del grafo" << endl;
+    cout << "m. Calcular el arbol generador de [m]inimo coste (Prim) y (MODIFICACION) -> [m]aximo" << endl;
+	  //Aqu� se a�aden m�s opciones al men� del grafo no dirigido
+  } else {
+  	cout << "i. Mostrar [i]nformacion basica del grafo" << endl;
+    cout << "s. Mostrar la lista de [s]ucesores del grafo" << endl;
+    cout << "p. Mostrar la lista de [p]redecesores del grafo" << endl;
+    cout << "o. Mostrar c[o]mponentes fuertemente conexas del grafo" << endl;
+	  //Aqu� se a�aden m�s opciones al men� del grafo dirigido
+  };
+  cout << "q. Finalizar el programa" << endl;
+  cout << "Introduce la letra de la accion a ejecutar  > ";
+  cin >> opcion;
 };
 
-#endif
+
+// El principal es simplemente un gestor de menu, diferenciando acciones para dirigido y para no dirigido, y un men� inicial si no hay un grafo cargado
+int main(int argc, char *argv[])
+{
+  int error_apertura;
+  char nombrefichero[85], opcion;
+  clrscr();
+  //Si tenemos el nombre del primer fichero por argumento, es una excepcion, y lo intentamos cargar, si no, lo pedimos desde teclado
+  if (argc > 1) {	
+		cout << "Cargando datos desde el fichero dado como argumento" << endl;
+    strcpy(nombrefichero, argv[1]);
+  } else {
+    cout << "Introduce el nombre completo del fichero de datos" << endl;
+    cin >> nombrefichero;
+  };
+  GRAFO G(nombrefichero, error_apertura);
+  if (error_apertura == 1) {
+  	cout << "Error en la apertura del fichero desde argumento: revisa nombre y formato" << endl;
+    pressanykey();
+    clrscr();
+  } else {
+    cout<< "Grafo cargado desde el fichero " << nombrefichero << endl;
+    pressanykey();
+    clrscr();
+    do {
+      menu(G.Es_dirigido(), opcion);
+      switch (opcion) {
+        case 'c' :
+          clrscr();
+         	cout << "Introduce el nombre completo del fichero de datos" << endl;
+          cin >> nombrefichero;
+          G.actualizar(nombrefichero, error_apertura);
+        	if (error_apertura == 1) {
+            cout << "Error en la apertura del fichero: revisa nombre y formato : puedes volver a intentarlo" << endl;
+          } else {
+            cout << "Fichero cargado correctamente desde " << nombrefichero << endl;
+          };
+          pressanykey();
+          clrscr();
+          break;
+
+        case 'i' :
+          clrscr();
+		    	cout << "Grafo cargado desde " << nombrefichero << endl;
+          G.Info_Grafo();
+          pressanykey();
+          clrscr();
+          break;
+
+        case 'a':
+          clrscr();
+          G.Mostrar_Listas(0);
+          pressanykey();
+          clrscr();
+          break;
+
+        case 's':
+          clrscr();
+          G.Mostrar_Listas(1);
+          pressanykey();
+          clrscr();
+          break;
+
+        case 'p':
+          clrscr();
+          G.Mostrar_Listas(-1);
+          pressanykey();
+          clrscr();
+          break;
+
+        case 'o':
+          clrscr();
+          if (G.Es_dirigido() == 0) {
+            G.ComponentesConexas();
+          } else {
+            G.ComponentesFuertementeConexas();
+          } 
+          pressanykey();
+          clrscr();
+          break;
+        
+        case 'm':
+          clrscr();  
+          G.Prim();
+          pressanykey();
+          G.Prim_bis();
+          pressanykey();
+          clrscr();
+          break;
+            
+        case 'q':
+            clrscr();
+            break;
+      }
+    }
+    while (opcion != 'q');
+  }
+  cout << "Fin del programa" << endl;
+	return(0);
+};

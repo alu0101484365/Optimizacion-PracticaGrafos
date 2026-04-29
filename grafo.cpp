@@ -204,65 +204,145 @@ void GRAFO::ComponentesFuertementeConexas()
 }
 
 void GRAFO::Prim() {
-	vector<bool> M;
+	vector<bool> visitado;
 	vector<int> coste;
 	vector<unsigned> pred;
-	M.resize(n, false);
+	
+	visitado.resize(n, false);
 	coste.resize(n, maxint);
 	pred.resize(n, UERROR);
-	int nodo;
-	cout << "Introduzca un nodo de partida: "; cin >> nodo;
 	
-	// 1. REGLA DE ORO y Preparativos iniciales
-  unsigned r = nodo - 1; 
-  coste[r] = 0;
-  pred[r] = r;
-  unsigned u = r; // 'u' será siempre la última ciudad que hemos conquistado
-  M[u] = true;    // Ya tenemos nuestra primera ciudad en el imperio
-	vector<unsigned> orden;
-	orden.push_back(u);
-	int pesoMST = 0; // Aquí iremos sumando el coste total del asfalto
-    
-  // 2. EL BUCLE PRINCIPAL (n-1 iteraciones)
-  for (unsigned i = 1; i < n; i++) {
-    // Fase A: Asomarnos a los vecinos de 'u' y actualizar la libreta
-    for (unsigned j = 0; j < LS[u].size(); j++) {
-      unsigned vecino = LS[u][j].j;
-      int coste_carretera = LS[u][j].c;
-            
-      // Si el vecino NO está en M, y esta carretera es más barata que la que teníamos...
-      if (M[vecino] == false && coste[vecino] > coste_carretera) {
-        coste[vecino] = coste_carretera; // Apuntamos el nuevo superprecio
-        pred[vecino] = u;                // Apuntamos que llegaremos desde 'u'
-      }
-    }
-        
-    // Fase B: Buscar la ciudad NO conquistada con el precio más barato
-  	int min_coste = maxint;
-    for (unsigned k = 0; k < n; k++) {
-      if (M[k] == false && coste[k] < min_coste) {
-        min_coste = coste[k];
-        u = k; // ¡Tenemos nuevo candidato a conquistar!
-      }
-  	}
-        
-    // Fase C: Conquistar la ciudad ganadora 'u'
-  	M[u] = true;
-    pesoMST += coste[u];
-		orden.push_back(u);
-    
-    // Imprimir la carretera que hemos asfaltado (Regla de oro a la inversa para el usuario)
-    cout << "Arista anadida: (" << pred[u] + 1 << ", " << u + 1 << ") con coste " << coste[u] << endl;
-    }
-  cout << "Orden de inclusion de los nodos: ";
-	for (unsigned i = 0; i < orden.size(); i++) {
-		cout << orden[i] + 1; // +1 por la regla de oro para el usuario
-		
-		if (i < orden.size() - 1) {
+	int nodo;
+	cout << "Introduzca un nodo de partida: "; 
+	cin >> nodo;
+
+	unsigned r = nodo - 1; 
+	coste[r] = 0;
+	pred[r] = r;
+	unsigned u = r; 
+	visitado[u] = true;    
+	
+	vector<unsigned> orden_nodos;
+	orden_nodos.push_back(u);
+	
+	int coste_total = 0; 
+	unsigned nodos_descubiertos = 1;
+	
+	for (unsigned i = 1; i < n; i++) {
+		for (unsigned j = 0; j < LS[u].size(); j++) {
+			unsigned adyacente = LS[u][j].j;
+			int coste_arista = LS[u][j].c;	
+			if (visitado[adyacente] == false) {
+				if (coste[adyacente] == maxint) {
+					nodos_descubiertos++; 
+				}
+				if (coste[adyacente] > coste_arista) {
+					coste[adyacente] = coste_arista; 
+					pred[adyacente] = u;                
+				}
+			}
+		}
+		if (orden_nodos.size() == nodos_descubiertos) {
+			cout << endl << "No es conexo..." << endl;
+			break; 
+		}
+		int min_coste = maxint;
+		for (unsigned k = 0; k < n; k++) {
+			if (visitado[k] == false && coste[k] < min_coste) {
+				min_coste = coste[k];
+				u = k; 
+			}
+		}
+		visitado[u] = true;
+		coste_total += coste[u];
+		orden_nodos.push_back(u);
+	} 
+	
+	cout << "Orden de inclusion de los nodos: ";
+	for (unsigned i = 0; i < orden_nodos.size(); i++) {
+		cout << orden_nodos[i] + 1; 
+		if (i < orden_nodos.size() - 1) {
 			cout << " -> ";
 		}
 	}
 	cout << endl;
-  // Al final, mostramos el dinero total que nos ha costado
-  cout << "El coste total del arbol generador minimo (MST) es: " << pesoMST << endl;
+	cout << "Aristas que forman el arbol de minimo coste: " << endl;
+	for (unsigned i = 1; i < orden_nodos.size(); i++) {
+		unsigned nodo_i = orden_nodos[i];
+		cout << "Arista (" << pred[nodo_i] + 1 << ", " << nodo_i + 1 << ") con coste " << coste[nodo_i] << endl;
+	}
+	
+	cout << endl;
+	cout << "El coste total del arbol generador de minimo coste es: " << coste_total << endl;
+}
+
+void GRAFO::Prim_bis() {
+	vector<bool> visitado;
+	vector<int> coste;
+	vector<unsigned> pred;
+	
+	visitado.resize(n, false);
+	coste.resize(n, -maxint);
+	pred.resize(n, UERROR);
+	
+	int nodo;
+	cout << "Introduzca un nodo de partida: "; 
+	cin >> nodo;
+
+	unsigned r = nodo - 1; 
+	coste[r] = 0;
+	pred[r] = r;
+	unsigned u = r; 
+	visitado[u] = true;    
+	
+	vector<unsigned> orden_nodos;
+	orden_nodos.push_back(u);
+	
+	int beneficio_total = 0;
+	unsigned nodos_descubiertos = 1;
+	for (unsigned i = 1; i < n; i++) {
+		for (unsigned j = 0; j < LS[u].size(); j++) {
+			unsigned adyacente = LS[u][j].j;
+			int coste_arista = LS[u][j].c;	
+			if (visitado[adyacente] == false) {
+				if (coste[adyacente] == -maxint) {
+					nodos_descubiertos++; 
+				}
+				if (coste[adyacente] < coste_arista) {
+					coste[adyacente] = coste_arista; 
+					pred[adyacente] = u;                
+				}
+			}
+		}
+		if (orden_nodos.size() == nodos_descubiertos) {
+			cout << endl << "No es conexo..." << endl;
+			break; 
+		}
+		int max_beneficio = -maxint; 
+		for (unsigned k = 0; k < n; k++) {
+			if (visitado[k] == false && coste[k] > max_beneficio) {
+				max_beneficio = coste[k];
+				u = k; 
+			}
+		}
+		visitado[u] = true;
+		beneficio_total += coste[u];
+		orden_nodos.push_back(u);
+	} 
+	
+	cout << "Orden de inclusion de los nodos: ";
+	for (unsigned i = 0; i < orden_nodos.size(); i++) {
+		cout << orden_nodos[i] + 1; 
+		if (i < orden_nodos.size() - 1) {
+			cout << " -> ";
+		}
+	}
+	cout << endl;
+	
+	cout << "Aristas que forman el Arbol Generador de Beneficio Maximo:" << endl;
+	for (unsigned i = 1; i < orden_nodos.size(); i++) {
+		unsigned nodo_i = orden_nodos[i];
+		cout << "Arista (" << pred[nodo_i] + 1 << ", " << nodo_i + 1  << ") con beneficio " << coste[nodo_i] << endl;
+	}
+	cout << endl << "El beneficio total del arbol generador maximo es: " << beneficio_total << endl;
 }

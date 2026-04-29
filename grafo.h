@@ -62,6 +62,7 @@ class GRAFO {
     void ComponentesFuertementeConexas(); //
 		// PRACTICA 4
 		void Prim();
+		void Prim_bis();
     ~GRAFO(); //Destructor del objeto grafo
 };
 

@@ -9,8 +9,8 @@
 #include <string.h>
 #include "grafo.h"
 
-void pressanykey()
-{     
+void pressanykey() 
+{
   char c;
   //system("pause"); s�lo en windows
   cout << endl;
@@ -35,6 +35,7 @@ void menu (unsigned dirigido, char &opcion)
     cout << "s. Mostrar la lista de [s]ucesores del grafo" << endl;
     cout << "p. Mostrar la lista de [p]redecesores del grafo" << endl;
     cout << "o. Mostrar c[o]mponentes fuertemente conexas del grafo" << endl;
+    cout << "t. Caminos mínimos - [T]WOQ" << endl;
 	  //Aqu� se a�aden m�s opciones al men� del grafo dirigido
   };
   cout << "q. Finalizar el programa" << endl;
@@ -132,6 +133,13 @@ int main(int argc, char *argv[])
           clrscr();
           break;
             
+        case 't':
+          clrscr();
+          G.TWOQ();
+          pressanykey();
+          clrscr();
+          break;
+
         case 'q':
             clrscr();
             break;

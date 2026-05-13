@@ -62,8 +62,13 @@ class GRAFO {
     void ComponentesFuertementeConexas(); //
 		// PRACTICA 4
 		void Prim();
+		// Modificacion -> Practica 4
 		void Prim_bis();
+		// PRACTICA 5
+		void TWOQ(void);
     ~GRAFO(); //Destructor del objeto grafo
 };
+
+void MostrarCamino(unsigned, unsigned, vector<unsigned>);
 
 #endif

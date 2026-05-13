@@ -346,3 +346,93 @@ void GRAFO::Prim_bis() {
 	}
 	cout << endl << "El beneficio total del arbol generador maximo es: " << beneficio_total << endl;
 }
+
+// Practica 5
+
+void MostrarCamino(unsigned s, unsigned i, vector<unsigned> pred) {
+  if (i != s) {
+    MostrarCamino(s, pred[i], pred);
+    cout << " -> " << i + 1;
+  } else {
+    cout << i + 1;
+  }
+}
+
+void GRAFO::TWOQ() {
+  if (dirigido == 0) {
+    cout << "El algoritmo TWOQ no se puede aplicar a grafos NO dirigidos.\n";
+    return;
+  }
+
+	deque<unsigned> dcola1, dcola2;
+  vector<int> d;
+  vector<unsigned> pred;
+  vector<bool> Encola;
+  unsigned s;
+
+  Encola.resize(n, false);
+  d.resize(n, maxint);
+  pred.resize(n, UERROR);
+
+  int Cmin = 0;
+  for (unsigned i = 0; i < n; i++) {
+    for (unsigned j = 0; j < LS[i].size(); j++) {
+      if (LS[i][j].c < Cmin) {
+        Cmin = LS[i][j].c;
+      }
+    }
+  }
+
+  cout << "Introduzca nodo origen: ";
+  cin >> s;
+  s--;
+  d[s] = 0;
+  pred[s] = s;
+  dcola2.push_back(s);
+  Encola[s] = true;
+  while (!dcola1.empty() || !dcola2.empty()) {
+    unsigned k;
+    if (!dcola1.empty()) {
+      k = dcola1.front();
+      dcola1.pop_front();
+    } else {
+      k = dcola2.front();
+      dcola2.pop_front();
+    }
+    Encola[k] = false;
+    for (unsigned i = 0; i < LS[k].size(); i++) {
+      unsigned j = LS[k][i].j;
+      int coste = LS[k][i].c;
+      if (d[j] > d[k] + coste) {
+        d[j] = d[k] + coste;
+        pred[j] = k;
+        if (d[j] < (int)((n - 1) * Cmin)) {
+          cout << "Existe al menos un circuito de coste negativo en el grafo\n";
+          return;
+        }
+        if (!Encola[j]) {
+          if (pred[j] == k && d[j] == d[k] + coste) {
+            if (pred[j] == UERROR) {
+              dcola2.push_back(j);
+            } else {
+              dcola1.push_back(j);
+            }
+            Encola[j] = true;
+          }
+        }
+      }
+    }
+  }
+
+  cout << "\nSoluciones:\n";
+  for (unsigned i = 0; i < n; i++) {
+    cout << "Nodo " << i + 1 << ": ";
+    if (d[i] == maxint) {
+      cout << "No alcanzable\n";
+    } else {
+      cout << "Distancia = " << d[i] << " Camino: ";
+      MostrarCamino(s, i, pred);
+      cout << endl;
+    }
+  }
+}
